@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import com.wang.demo.Data;
 import com.wang.utils.Parser;
@@ -21,8 +22,8 @@ public final class App {
     private void test(List<List<Data[]>> lst){
         System.out.println("test is running...");
     }
-    List<List<Data[]>> lst;
-    //Data lst;
+    List<List<Map<String, Data[]>>> lst;
+    //Map<String, String> lst;
     
     /**
      * Says hello to the world.

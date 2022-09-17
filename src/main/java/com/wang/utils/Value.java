@@ -10,9 +10,5 @@ public interface Value {
             put(int.class, 1);
     }};
 
-    default boolean isSimpletType(Type type) {
-        return values.containsKey(type);
-    }
-
     Object set() throws Throwable;
 }

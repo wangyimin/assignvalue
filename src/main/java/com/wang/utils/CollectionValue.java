@@ -8,10 +8,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
-@SuppressWarnings("rawtypes")
 public class CollectionValue extends GenericValue{
+    Value ext;
+
+    @SuppressWarnings("rawtypes")
     public CollectionValue(Class<? extends Collection> clazz, Value ext){
-        super(clazz, ext);
+        super(clazz);
+        this.ext = ext;
     }
     
     @Override
@@ -23,7 +26,7 @@ public class CollectionValue extends GenericValue{
         };
 
         @SuppressWarnings("unchecked")
-        java.util.Collection<Object> lst = 
+        Collection<Object> lst = 
             (Collection<Object>)convert.apply(clazz).getDeclaredConstructor().newInstance();
         lst.add(ext.set());
         return lst;
