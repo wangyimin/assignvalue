@@ -6,19 +6,23 @@ import java.util.Map;
 public class MapValue<K, V> extends GenericValue{
     Class<K> key;
     Class<V> value;
+    Value extKey;
+    Value extValue;
 
     @SuppressWarnings("rawtypes")
-    public MapValue(Class<? extends Map> clazz, Class<K> key, Class<V> value){
+    public MapValue(Class<? extends Map> clazz, Class<K> key, Class<V> value, Value extKey, Value extValue){
         super(clazz);
         this.key = key;
         this.value = value;
+        this.extKey = extKey;
+        this.extValue = extValue;
     }
     
     @Override
     @SuppressWarnings("unchecked")
     public Object set() throws Throwable{
         Map<K, V> map = new HashMap<>();
-        map.put((K)Parser.parse(key).set(), (V)Parser.parse(value).set());
+        map.put((K)extKey.set(), (V)extValue.set());
         return map;
     }
 }

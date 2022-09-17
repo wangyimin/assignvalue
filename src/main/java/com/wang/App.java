@@ -19,8 +19,9 @@ public final class App {
     }
 
     @SuppressWarnings("unused")
-    private void test(List<List<Data[]>> lst){
+    private void test(List<Map<String, List<Data[]>>> lst){
         System.out.println("test is running...");
+        //lst.get(0).get("20220917").get(0)[0].map.toString()
     }
     List<List<Map<String, Data[]>>> lst;
     //Map<String, String> lst;
@@ -39,6 +40,7 @@ public final class App {
         Field f = App.class.getDeclaredField("lst");
         Value v = Parser.parse(f);
         f.set(app, v.set());
+        //app.lst.get(0).get(0).get("20220917")[0].map.toString()
 
         Method m = Arrays.asList(App.class.getDeclaredMethods()).stream().filter(el->el.getName().equals("test")).findFirst().get();
         Parameter p = m.getParameters()[0];

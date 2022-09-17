@@ -15,13 +15,18 @@ public class Parser {
         
         if (t instanceof ParameterizedType){
             Type raw = ((ParameterizedType)t).getRawType();
-
+            
             if (Collection.class.isAssignableFrom((Class<?>)raw)){
+                //配列
                 Type ext = ((ParameterizedType)t).getActualTypeArguments()[0]; 
                 r = new CollectionValue((Class<? extends Collection>)raw, parse(ext));
             }else if (Map.class.isAssignableFrom((Class<?>)raw)){
+                //Map
                 Type[] param = ((ParameterizedType)t).getActualTypeArguments();
-                return new MapValue((Class<?>)raw, (Class<?>)param[0], (Class<?>)param[1]);
+                Type key = param[0] instanceof ParameterizedType ? ((ParameterizedType)param[0]).getActualTypeArguments()[0] : param[0];
+                Type value = param[1] instanceof ParameterizedType ? ((ParameterizedType)param[1]).getActualTypeArguments()[0] : param[1];
+                
+                r = new MapValue((Class<?>)raw, (Class<?>)key, (Class<?>)value, parse(param[0]), parse(param[1]));
             }else
                 throw new UnsupportedOperationException("Unsupport type[" + t + "].");
         }else if (((Class<?>)t).isArray()){
@@ -30,7 +35,7 @@ public class Parser {
             return Value.values.containsKey(t) ? 
                 new GenericValue((Class<?>)t) : new PojoValue((Class<?>)t);
         }
-        
+
     	return r;
     }
 
@@ -40,7 +45,6 @@ public class Parser {
 
     public static Value parse(Parameter p){
         if (p.getParameterizedType() != null) return parse(p.getParameterizedType());
-        if (p.getType().isArray()) return parse(p.getType());
-        throw new UnsupportedOperationException("Unsupport type[" + p + "].");
+        return parse(p.getType());
     }
 }
