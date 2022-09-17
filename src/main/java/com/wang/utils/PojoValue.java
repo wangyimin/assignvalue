@@ -33,7 +33,6 @@ public class PojoValue extends GenericValue{
 
 			Value value = Parser.parse(f);
             f.set(obj, value.set());
-
 		}
 		return obj;
     }
