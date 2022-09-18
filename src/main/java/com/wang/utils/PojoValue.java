@@ -17,18 +17,17 @@ public class PojoValue extends GenericValue{
     @Override
     public Object set() throws Throwable{
 		final Function<Class<?>, Boolean> isPOJO = (clazz) ->{
-			if (Modifier.isAbstract(clazz.getModifiers()) || Modifier.isStatic(clazz.getModifiers())) return null;
-
-			return Arrays.asList(clazz.getDeclaredConstructors()).stream()
-					.allMatch(el -> Modifier.isPublic(el.getModifiers()) && el.getParameterCount() == 0);
+			return Modifier.isAbstract(clazz.getModifiers()) || Modifier.isStatic(clazz.getModifiers()) ? false :
+						Arrays.asList(clazz.getDeclaredConstructors()).stream()
+							.allMatch(el -> Modifier.isPublic(el.getModifiers()) && el.getParameterCount() == 0);
 		};
 
         @SuppressWarnings("rawtypes")
-		final BiFunction<Class<?>, Object, Boolean> isNull = (clazz, v) -> {
-			if (v == null)                                return true;
-			if (Collection.class.isAssignableFrom(clazz)) return ((Collection)v).size() == 0;
-			if (Map.class.isAssignableFrom(clazz))        return ((Map)v).entrySet().size() == 0;
-			if (clazz.isArray())                          return Array.getLength(v) == 0;
+		final BiFunction<Class<?>, Object, Boolean> isNull = (c, v) -> {
+			if (v == null)                            return true;
+			if (Collection.class.isAssignableFrom(c)) return ((Collection)v).size() == 0;
+			if (Map.class.isAssignableFrom(c))        return ((Map)v).entrySet().size() == 0;
+			if (c.isArray())                          return Array.getLength(v) == 0;
 
 			return false;
 		};
@@ -43,8 +42,7 @@ public class PojoValue extends GenericValue{
 			f.setAccessible(true);
             if (!isNull.apply(f.getType(), f.get(obj))) continue;
 
-			Value value = Parser.parse(f);
-            f.set(obj, value.set());
+            f.set(obj, Parser.parse(f).set());
 		}
 		return obj;
     }

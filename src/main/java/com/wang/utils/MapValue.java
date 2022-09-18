@@ -21,10 +21,8 @@ public class MapValue<K, V> extends GenericValue{
     public Object set() throws Throwable{
         Map<K, V> map = Map.of((K)extKey.set(), (V)extValue.set());
 
-        if (!clazz.isInterface()) 
-            return clazz.getConstructor(Map.class).newInstance(map); 
-        
-        return map;
+        return clazz.isInterface() ? map :
+             clazz.getConstructor(Map.class).newInstance(map); 
     }
 
     public String show(){

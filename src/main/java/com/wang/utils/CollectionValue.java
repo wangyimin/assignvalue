@@ -18,9 +18,8 @@ public class CollectionValue<E> extends GenericValue{
     public Object set() throws Throwable{
         Collection<E> lst = List.of((E)ext.set());
 
-        if (!clazz.isInterface()) 
-            return clazz.getConstructor(Collection.class).newInstance(lst); 
-        return lst;
+        return clazz.isInterface() ? lst :
+            clazz.getConstructor(Collection.class).newInstance(lst); 
     }
 
     public String show(){

@@ -35,19 +35,12 @@ public class Parser {
     };
 
     static Function<Type, Value> genericType = (t) -> {
-        if (((Class<?>)t).isArray()){
-            return new ArrayValue(((Class<?>)t).getComponentType());
-        }else{
-            return Value.values.containsKey(t) ? 
-                new GenericValue((Class<?>)t) : new PojoValue((Class<?>)t);
-        }
+        return ((Class<?>)t).isArray() ? new ArrayValue(((Class<?>)t).getComponentType()) :
+            (Value.values.containsKey(t) ? new GenericValue((Class<?>)t) : new PojoValue((Class<?>)t));
     };
     
     public static Value parse(Type t){
-        if (t instanceof ParameterizedType)
-            return parameterizedType.apply(t);
-        else
-            return genericType.apply(t);
+        return t instanceof ParameterizedType ? parameterizedType.apply(t) : genericType.apply(t);
     }
 
     public static Value parse(Field f){
@@ -55,7 +48,6 @@ public class Parser {
     }
 
     public static Value parse(Parameter p){
-        if (p.getParameterizedType() != null) return parse(p.getParameterizedType());
-        return parse(p.getType());
+        return p.getParameterizedType() != null ? parse(p.getParameterizedType()) : parse(p.getType());
     }
 }
