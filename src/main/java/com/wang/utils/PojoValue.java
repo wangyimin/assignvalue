@@ -5,11 +5,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class PojoValue extends GenericValue{
+	static Map<String, Object> pojos = new HashMap<>();
+	
     public PojoValue(Class<?> clazz){
         super(clazz);
     }
@@ -32,8 +35,9 @@ public class PojoValue extends GenericValue{
 			return false;
 		};
 
-		if (!isPOJO.apply(clazz)) return null;
+		if (!isPOJO.apply(clazz)) return null;		
         Object obj = clazz.getConstructor().newInstance();
+		pojos.put(clazz.getName(), obj);
 
 		Field[] fs = clazz.getDeclaredFields();
 		for (Field f : fs) {
@@ -42,7 +46,7 @@ public class PojoValue extends GenericValue{
 			f.setAccessible(true);
             if (!isNull.apply(f.getType(), f.get(obj))) continue;
 
-            f.set(obj, Parser.parse(f).set());
+			f.set(obj, pojos.containsKey(f.getType().getName())?pojos.get(f.getType().getName()):Parser.parse(f).set());
 		}
 		return obj;
     }

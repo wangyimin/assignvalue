@@ -8,6 +8,7 @@ public class Data {
     public int[] arr;
     public List<String> lst;
     public Map<String, String> map;
+    public Data data;
     public Data(){}
     /*
     public Data(String name, int age){
