@@ -29,4 +29,10 @@ public class MapValue<K, V> extends GenericValue{
         
         return map;
     }
+
+    public String show(){
+        return "new " + MapValue.class.getSimpleName() + "(" + clazz.getSimpleName() + "<" +
+            key.getSimpleName() + ", " + value.getSimpleName() + ">, " +
+            extKey.show() + ", " + extValue.show() + ")";
+    }
 }

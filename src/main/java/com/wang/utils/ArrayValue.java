@@ -16,4 +16,8 @@ public class ArrayValue extends GenericValue{
 	
 		return obj;
     }
+
+    public String show(){
+      return "new " + ArrayValue.class.getSimpleName() + "(" + clazz.getSimpleName() + "[])";
+  }
 }

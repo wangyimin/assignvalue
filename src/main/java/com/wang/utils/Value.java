@@ -11,4 +11,5 @@ public interface Value {
     }};
 
     Object set() throws Throwable;
+    default String show(){return "unknown implementation.";};
 }

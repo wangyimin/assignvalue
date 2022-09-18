@@ -24,4 +24,9 @@ public class CollectionValue<E> extends GenericValue{
             return clazz.getConstructor(Collection.class).newInstance(lst); 
         return lst;
     }
+
+    public String show(){
+        return "new " + CollectionValue.class.getSimpleName() + "(" + clazz.getSimpleName() + "<" +
+            element.getSimpleName() + ">, " + ext.show() + ")";
+    }
 }

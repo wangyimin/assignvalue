@@ -36,4 +36,8 @@ public class PojoValue extends GenericValue{
 		}
 		return obj;
     }
+
+	public String show(){
+		return "new " + PojoValue.class.getSimpleName() + "(" + clazz.getSimpleName() + ")";
+	}
 }

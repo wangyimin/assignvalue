@@ -42,12 +42,14 @@ public final class App {
 
         Field f = App.class.getDeclaredField("lst");
         Value v = Parser.parse(f);
+        System.out.println(v.show());
         f.set(app, v.set());
         //app.lst.get(0).get(0).get("20220917")[0].map.toString()
 
         Method m = Arrays.asList(App.class.getDeclaredMethods()).stream().filter(el->el.getName().equals("test")).findFirst().get();
         Parameter p = m.getParameters()[0];
         v = Parser.parse(p);
+        System.out.println(v.show());
         m.invoke(app, v.set());
         
         System.out.println("Hello World!");

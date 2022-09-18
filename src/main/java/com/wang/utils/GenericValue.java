@@ -12,4 +12,8 @@ public class GenericValue implements Value{
     public Object set() throws Throwable{
         return values.get(clazz);
     } 
+
+    public String show(){
+        return "new " + GenericValue.class.getSimpleName() + "(" + clazz.getSimpleName() + ")";
+    }
 }
