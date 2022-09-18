@@ -22,7 +22,7 @@ public class PojoValue extends GenericValue{
 			return false;
 		};
         
-        Object obj = clazz.newInstance();
+        Object obj = clazz.getConstructor().newInstance();
 
 		Field[] fs = clazz.getDeclaredFields();
 		for (Field f : fs) {
