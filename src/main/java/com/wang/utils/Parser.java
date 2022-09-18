@@ -9,6 +9,17 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class Parser {
+    static Function<Type, Type> getRawType = (t) -> {
+        Type type = t;
+        Type raw = t;
+
+        while (type instanceof ParameterizedType){
+            raw = ((ParameterizedType)type).getRawType();
+            type = ((ParameterizedType)type).getActualTypeArguments()[0];
+        }
+        return raw;
+    };
+
     @SuppressWarnings({"rawtypes", "unchecked"})
     static Function<Type, Value> parameterizedType = (t) -> {
         Type raw = ((ParameterizedType)t).getRawType();
@@ -16,13 +27,14 @@ public class Parser {
         if (Collection.class.isAssignableFrom((Class<?>)raw)){
             //配列
             Type ext = ((ParameterizedType)t).getActualTypeArguments()[0]; 
-
-            return new CollectionValue((Class<? extends Collection>)raw, parse(ext));
+            Type element = getRawType.apply(ext);
+            
+            return new CollectionValue((Class<? extends Collection>)raw, (Class<?>)element, parse(ext));
         }else if (Map.class.isAssignableFrom((Class<?>)raw)){
             //Map
             Type[] param = ((ParameterizedType)t).getActualTypeArguments();
-            Type key = param[0] instanceof ParameterizedType ? ((ParameterizedType)param[0]).getActualTypeArguments()[0] : param[0];
-            Type value = param[1] instanceof ParameterizedType ? ((ParameterizedType)param[1]).getActualTypeArguments()[0] : param[1];
+            Type key = getRawType.apply(param[0]);
+            Type value = getRawType.apply(param[1]);
                 
             return new MapValue((Class<? extends Map>)raw, (Class<?>)key, (Class<?>)value, parse(param[0]), parse(param[1]));
         }else

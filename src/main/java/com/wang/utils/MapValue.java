@@ -23,6 +23,10 @@ public class MapValue<K, V> extends GenericValue{
     public Object set() throws Throwable{
         Map<K, V> map = new HashMap<>();
         map.put((K)extKey.set(), (V)extValue.set());
+
+        if (!clazz.isInterface()) 
+            return clazz.getConstructor(Map.class).newInstance(map); 
+        
         return map;
     }
 }

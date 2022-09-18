@@ -1,34 +1,27 @@
 package com.wang.utils;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
 
-public class CollectionValue extends GenericValue{
+public class CollectionValue<E> extends GenericValue{
+    Class<E> element;
     Value ext;
 
     @SuppressWarnings("rawtypes")
-    public CollectionValue(Class<? extends Collection> clazz, Value ext){
+    public CollectionValue(Class<? extends Collection> clazz, Class<E> element, Value ext){
         super(clazz);
+        this.element = element;
         this.ext = ext;
     }
     
     @Override
+    @SuppressWarnings("unchecked")
     public Object set() throws Throwable{
-        final Function<Type, Class<?>> convert = (t) ->{
-            if (List.class.equals(t))  return ArrayList.class;
-            if (Set.class.equals(t))   return HashSet.class;
-            throw new UnsupportedOperationException("Unsupport type[" + t + "].");
-        };
+        Collection<E> lst = (Collection<E>)new ArrayList<>();
+        lst.add((E)ext.set());
 
-        @SuppressWarnings("unchecked")
-        Collection<Object> lst = 
-            (Collection<Object>)convert.apply(clazz).getDeclaredConstructor().newInstance();
-        lst.add(ext.set());
+        if (!clazz.isInterface()) 
+            return clazz.getConstructor(Collection.class).newInstance(lst); 
         return lst;
     }
 }

@@ -3,9 +3,12 @@ package com.wang;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.wang.demo.Data;
 import com.wang.utils.Parser;
@@ -23,8 +26,8 @@ public final class App {
         System.out.println("test is running...");
         //lst.get(0).get("20220917").get(0)[0].map.toString()
     }
-    List<List<Map<String, Data[]>>> lst;
-    //Map<String, String> lst;
+    //List<List<Map<String, Data[]>>> lst;
+    HashMap<ArrayList<Set<Map<String, String>>>, String[]> lst;
     
     /**
      * Says hello to the world.
