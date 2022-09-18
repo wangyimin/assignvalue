@@ -46,7 +46,7 @@ public class Parser {
     }
 
     public static Value parse(Field f){
-        return f.getType().isArray() ? parse(f.getType()) : parse(f.getGenericType());
+        return parse(f.getGenericType());
     }
 
     public static Value parse(Parameter p){
