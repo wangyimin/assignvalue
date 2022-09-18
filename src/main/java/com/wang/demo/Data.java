@@ -9,8 +9,10 @@ public class Data {
     public List<String> lst;
     public Map<String, String> map;
     public Data(){}
+    /*
     public Data(String name, int age){
         this.name = name;
         this.age = age;
     } 
+    */
 }

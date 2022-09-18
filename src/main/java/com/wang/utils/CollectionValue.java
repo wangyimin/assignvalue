@@ -1,7 +1,7 @@
 package com.wang.utils;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public class CollectionValue<E> extends GenericValue{
     Class<E> element;
@@ -14,11 +14,9 @@ public class CollectionValue<E> extends GenericValue{
         this.ext = ext;
     }
     
-    @Override
     @SuppressWarnings("unchecked")
     public Object set() throws Throwable{
-        Collection<E> lst = (Collection<E>)new ArrayList<>();
-        lst.add((E)ext.set());
+        Collection<E> lst = List.of((E)ext.set());
 
         if (!clazz.isInterface()) 
             return clazz.getConstructor(Collection.class).newInstance(lst); 

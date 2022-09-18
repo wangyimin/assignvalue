@@ -1,6 +1,5 @@
 package com.wang.utils;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class MapValue<K, V> extends GenericValue{
@@ -18,11 +17,9 @@ public class MapValue<K, V> extends GenericValue{
         this.extValue = extValue;
     }
     
-    @Override
     @SuppressWarnings("unchecked")
     public Object set() throws Throwable{
-        Map<K, V> map = new HashMap<>();
-        map.put((K)extKey.set(), (V)extValue.set());
+        Map<K, V> map = Map.of((K)extKey.set(), (V)extValue.set());
 
         if (!clazz.isInterface()) 
             return clazz.getConstructor(Map.class).newInstance(map); 

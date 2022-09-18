@@ -10,19 +10,12 @@ import java.util.function.Function;
 
 public class Parser {
     static Function<Type, Type> getRawType = (t) -> {
-        Type type = t;
-        Type raw = t;
-
-        while (type instanceof ParameterizedType){
-            raw = ((ParameterizedType)type).getRawType();
-            type = ((ParameterizedType)type).getActualTypeArguments()[0];
-        }
-        return raw;
+        return t instanceof ParameterizedType ? ((ParameterizedType)t).getRawType() : t;
     };
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     static Function<Type, Value> parameterizedType = (t) -> {
-        Type raw = ((ParameterizedType)t).getRawType();
+        Type raw = getRawType.apply(t);
             
         if (Collection.class.isAssignableFrom((Class<?>)raw)){
             //配列
@@ -40,7 +33,7 @@ public class Parser {
         }else
             throw new UnsupportedOperationException("Unsupport type[" + t + "].");
     };
-    
+
     static Function<Type, Value> genericType = (t) -> {
         if (((Class<?>)t).isArray()){
             return new ArrayValue(((Class<?>)t).getComponentType());

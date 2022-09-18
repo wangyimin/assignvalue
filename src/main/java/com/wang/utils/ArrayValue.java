@@ -7,9 +7,8 @@ public class ArrayValue extends GenericValue{
         super(clazz);
     }
     
-    @Override
     public Object set() throws Throwable{
-		Object obj = Array.newInstance(clazz, 1);
+        Object obj = Array.newInstance(clazz, 1);
 		
 		Object el = Parser.parse(clazz).set();
 		if (el != null) Array.set(obj, 0, el);
@@ -18,6 +17,6 @@ public class ArrayValue extends GenericValue{
     }
 
     public String show(){
-      return "new " + ArrayValue.class.getSimpleName() + "(" + clazz.getSimpleName() + "[])";
+        return "new " + ArrayValue.class.getSimpleName() + "(" + clazz.getSimpleName() + "[])";
   }
 }

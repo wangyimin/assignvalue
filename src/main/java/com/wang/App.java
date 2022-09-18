@@ -27,7 +27,7 @@ public final class App {
         //lst.get(0).get("20220917").get(0)[0].map.toString()
     }
     //List<List<Map<String, Data[]>>> lst;
-    HashMap<ArrayList<Set<Map<String, String>>>, String[]> lst;
+    HashMap<ArrayList<Set<Map<String, String>>>, int[]> lst;
     
     /**
      * Says hello to the world.
