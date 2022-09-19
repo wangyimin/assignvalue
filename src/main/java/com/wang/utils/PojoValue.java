@@ -3,12 +3,10 @@ package com.wang.utils;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class PojoValue extends GenericValue{
 	static Map<String, Object> pojos = new HashMap<>();
@@ -17,14 +15,7 @@ public class PojoValue extends GenericValue{
         super(clazz);
     }
 
-    @Override
     public Object set() throws Throwable{
-		final Function<Class<?>, Boolean> isPOJO = (clazz) ->{
-			return Modifier.isAbstract(clazz.getModifiers()) || Modifier.isStatic(clazz.getModifiers()) ? false :
-						Arrays.asList(clazz.getDeclaredConstructors()).stream()
-							.allMatch(el -> Modifier.isPublic(el.getModifiers()) && el.getParameterCount() == 0);
-		};
-
         @SuppressWarnings("rawtypes")
 		final BiFunction<Class<?>, Object, Boolean> isNull = (c, v) -> {
 			if (v == null)                            return true;
@@ -35,8 +26,9 @@ public class PojoValue extends GenericValue{
 			return false;
 		};
 
-		if (!isPOJO.apply(clazz)) return null;		
-        Object obj = clazz.getConstructor().newInstance();
+		ClassAnalysis ca = new ClassAnalysis(clazz);
+		Object obj = ca.newInstance();
+		if (ca.getParameterCount() != 0) return obj;
 		pojos.put(clazz.getName(), obj);
 
 		Field[] fs = clazz.getDeclaredFields();
