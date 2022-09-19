@@ -34,6 +34,7 @@ public class PojoValue extends GenericValue{
 		Field[] fs = clazz.getDeclaredFields();
 		for (Field f : fs) {
 			if (Modifier.isStatic(f.getModifiers())) continue;
+			if (ClassAnalysis.hasGenericType(f.getGenericType())) continue;
 			
 			f.setAccessible(true);
             if (!isNull.apply(f.getType(), f.get(obj))) continue;
