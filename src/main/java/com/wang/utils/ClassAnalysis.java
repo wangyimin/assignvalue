@@ -1,6 +1,7 @@
 package com.wang.utils;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -56,8 +57,7 @@ public class ClassAnalysis {
     }
 
     public String toString(){
-        String name = clazz.getName();
-        String r = name + "'s constructors: \n";
+        String r = clazz.getName() + "'s constructors: \n";
         for (Constructor<?> c : clazz.getDeclaredConstructors()){
             r = r + " " + (params != null && params.length == c.getParameterCount() ? "*" : " ") + 
                 (Modifier.isPublic(c.getModifiers()) ? "public  " : "private ") + c.getName() + "(";
@@ -78,7 +78,7 @@ public class ClassAnalysis {
     private String getTypeName(Type t){
         String r = "";
         if (t instanceof TypeVariable) r = ((TypeVariable)t).getName();
-        if (t instanceof ParameterizedType){
+        else if (t instanceof ParameterizedType){
             r = ((Class<?>)((ParameterizedType)t).getRawType()).getSimpleName() + "<"; 
             Type[] els = ((ParameterizedType)t).getActualTypeArguments();
             for (Type el : els){
@@ -86,6 +86,11 @@ public class ClassAnalysis {
             }
             if (els.length > 0) r = r.substring(0, r.length()-2) + ">";
         }
+        else if(t instanceof GenericArrayType) 
+            r = getTypeName(((GenericArrayType)t).getGenericComponentType()) + "[]";
+        else 
+            r = t.getTypeName();
+
         return r;
     }
 
@@ -96,6 +101,9 @@ public class ClassAnalysis {
             for (Type el : els)
                 if (hasGenericType(el)) return true;
         }
+        if(t instanceof GenericArrayType) 
+            return hasGenericType(((GenericArrayType)t).getGenericComponentType());
+            
         return false;
     }
 }
