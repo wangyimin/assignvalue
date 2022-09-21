@@ -10,6 +10,8 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ClassAnalysis {
     Class<?> clazz;
@@ -58,38 +60,27 @@ public class ClassAnalysis {
     }
 
     public String toString(){
-        String r = clazz.getName() + "'s constructors: \n";
-        for (Constructor<?> c : clazz.getDeclaredConstructors()){
-            r = r + " " + (params != null && params.length == c.getParameterCount() ? "*" : " ") + 
-                (Modifier.isPublic(c.getModifiers()) ? "public  " : "private ") + c.getName() + "(";
-            
-            int i = 0;
-            for (Type p : c.getGenericParameterTypes()){
-                r = r + getTypeName(p) + " arg" + i + ", ";
-                i = i + 1;
-            }
-            
-            if (c.getGenericParameterTypes().length > 0) r = r.substring(0, r.length()-2);
-            r = r + ")\n";
-        }
-        return r;
+        record mapper(Constructor<?> c, String s){}
+
+        Function<Constructor<?>, String> get = (c)->{
+            Type[] ps = c.getGenericParameterTypes();
+            return IntStream.range(0, ps.length).mapToObj(i -> getTypeName(ps[i]) + " arg" + i)
+                    .collect(Collectors.joining(", ")) + ")\n";
+        };
+
+        return clazz.getName() + "'s constructors: \n" + Arrays.stream(clazz.getDeclaredConstructors())
+            .map(c ->new mapper(c, " " + (params != null && params.length == c.getParameterCount() ? "*" : " ") + 
+                (Modifier.isPublic(c.getModifiers()) ? "public  " : "private ") + c.getName() + "("))
+            .map(el -> el.s + get.apply(el.c)).collect(Collectors.joining());
     }
 
     @SuppressWarnings("rawtypes")
     private String getTypeName(Type t){
-        Function<ParameterizedType, String> get = (pt) -> {
-            String s = ((Class<?>)pt.getRawType()).getSimpleName() + "<"; 
-            Type[] els = pt.getActualTypeArguments();
-            for (Type el : els){
-                s = s + getTypeName(el) + ", ";
-            }
-            if (els.length > 0) s = s.substring(0, s.length()-2) + ">";
-            return s;
-        };
-
         return switch(t){
             case TypeVariable c      -> c.getName();
-            case ParameterizedType c -> get.apply(c);
+            case ParameterizedType c -> ((Class<?>)c.getRawType()).getSimpleName() + "<"
+                                        + Arrays.stream(c.getActualTypeArguments())
+                                        .map(el->getTypeName(el)).collect(Collectors.joining(", ")) + ">";
             case GenericArrayType c  -> getTypeName(c.getGenericComponentType()) + "[]";
             default                  -> ((Class<?>)t).getSimpleName();
         };
