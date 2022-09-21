@@ -9,6 +9,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
+import java.util.function.Function;
 
 public class ClassAnalysis {
     Class<?> clazz;
@@ -76,34 +77,34 @@ public class ClassAnalysis {
 
     @SuppressWarnings("rawtypes")
     private String getTypeName(Type t){
-        String r = "";
-        if (t instanceof TypeVariable) r = ((TypeVariable)t).getName();
-        else if (t instanceof ParameterizedType){
-            r = ((Class<?>)((ParameterizedType)t).getRawType()).getSimpleName() + "<"; 
-            Type[] els = ((ParameterizedType)t).getActualTypeArguments();
+        Function<ParameterizedType, String> get = (pt) -> {
+            String s = ((Class<?>)pt.getRawType()).getSimpleName() + "<"; 
+            Type[] els = pt.getActualTypeArguments();
             for (Type el : els){
-                r = r + getTypeName(el) + ", ";
+                s = s + getTypeName(el) + ", ";
             }
-            if (els.length > 0) r = r.substring(0, r.length()-2) + ">";
-        }
-        else if(t instanceof GenericArrayType) 
-            r = getTypeName(((GenericArrayType)t).getGenericComponentType()) + "[]";
-        else 
-            r = t.getTypeName();
+            if (els.length > 0) s = s.substring(0, s.length()-2) + ">";
+            return s;
+        };
 
-        return r;
+        return switch(t){
+            case TypeVariable c      -> c.getName();
+            case ParameterizedType c -> get.apply(c);
+            case GenericArrayType c  -> getTypeName(c.getGenericComponentType()) + "[]";
+            default                  -> ((Class<?>)t).getSimpleName();
+        };
     }
 
     public static boolean hasGenericType(Type t){
         if (t instanceof TypeVariable) return true;
         if (t instanceof ParameterizedType){
-            Type[] els = ((ParameterizedType)t).getActualTypeArguments();
-            for (Type el : els)
+            for (Type el : ((ParameterizedType)t).getActualTypeArguments())
                 if (hasGenericType(el)) return true;
         }
         if(t instanceof GenericArrayType) 
-            return hasGenericType(((GenericArrayType)t).getGenericComponentType());
-            
+            if (hasGenericType(((GenericArrayType)t).getGenericComponentType()))
+                return true;
+                
         return false;
     }
 }
