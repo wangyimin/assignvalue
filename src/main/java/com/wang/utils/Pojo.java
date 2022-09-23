@@ -3,6 +3,7 @@ package com.wang.utils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -65,6 +66,8 @@ public interface Pojo {
 		return !clazz.isPrimitive() && !Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()); 
 	}
 
+    Object[] getConstructorParamaterValues(Parameter[] params);
+    
     default Object initialzie(Class<?> clazz){
 		if (!canEvaluable(clazz)) return null;
 		
@@ -76,8 +79,7 @@ public interface Pojo {
 
 		if (ctor.length == 0) return null;
 
-		Object[] values = Arrays.stream(ctor[0].getParameters()).map(el -> Parser.parse(el).set()).toArray();
-		
+		Object[] values = getConstructorParamaterValues(ctor[0].getParameters());
 		try{
         	return ctor[0].newInstance(values);
 		}catch(InstantiationException | IllegalAccessException | InvocationTargetException ignore ){}

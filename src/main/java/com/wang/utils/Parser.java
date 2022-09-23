@@ -8,46 +8,66 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
 
-public class Parser {
-    static Function<Type, Type> getRawType = (t) -> {
-        return t instanceof ParameterizedType ? ((ParameterizedType)t).getRawType() : t;
-    };
+public interface Parser {
+    Value parse(Type t);
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    static Function<Type, Value> parameterizedType = (t) -> {
-        Type raw = getRawType.apply(t);
-            
-        if (Collection.class.isAssignableFrom((Class<?>)raw)){
-            //配列
-            Type ext = ((ParameterizedType)t).getActualTypeArguments()[0]; 
-            Type element = getRawType.apply(ext);
-            
-            return new CollectionValue((Class<? extends Collection>)raw, (Class<?>)element, parse(ext));
-        }else if (Map.class.isAssignableFrom((Class<?>)raw)){
-            //Map
-            Type[] param = ((ParameterizedType)t).getActualTypeArguments();
-            Type key = getRawType.apply(param[0]);
-            Type value = getRawType.apply(param[1]);
-                
-            return new MapValue((Class<? extends Map>)raw, (Class<?>)key, (Class<?>)value, parse(param[0]), parse(param[1]));
-        }else
-            throw new UnsupportedOperationException("Unsupport type[" + t + "].");
-    };
-
-    static Function<Type, Value> genericType = (t) -> {
-        return ((Class<?>)t).isArray() ? new ArrayValue(((Class<?>)t).getComponentType()) :
-            (Value.values.containsKey(t) ? new GenericValue((Class<?>)t) : new PojoValue((Class<?>)t));
-    };
-    
-    public static Value parse(Type t){
-        return t instanceof ParameterizedType ? parameterizedType.apply(t) : genericType.apply(t);
-    }
-
-    public static Value parse(Field f){
+    default Value parse(Field f){
         return parse(f.getGenericType());
     }
-
-    public static Value parse(Parameter p){
+    
+    default Value parse(Parameter p){
         return p.getParameterizedType() != null ? parse(p.getParameterizedType()) : parse(p.getType());
+    }
+
+    class ParserImpl implements Parser{
+        //Collection、Map等
+        Function<Type, Value> parameterizedTypeFunc;
+        //Array、Primitive・Wrapper、Class等
+        Function<Type, Value> genericTypeFunc;
+
+        private Function<Type, Type> getRawType = (t) -> {
+            return t instanceof ParameterizedType ? ((ParameterizedType)t).getRawType() : t;
+        };
+    
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        private Function<Type, Value> parameterizedType = (t) -> {
+            Type raw = getRawType.apply(t);
+                
+            if (Collection.class.isAssignableFrom((Class<?>)raw)){
+                //配列
+                Type ext = ((ParameterizedType)t).getActualTypeArguments()[0]; 
+                Type element = getRawType.apply(ext);
+                
+                return new CollectionValue((Class<? extends Collection>)raw, (Class<?>)element, parse(ext));
+            }else if (Map.class.isAssignableFrom((Class<?>)raw)){
+                //Map
+                Type[] param = ((ParameterizedType)t).getActualTypeArguments();
+                Type key = getRawType.apply(param[0]);
+                Type value = getRawType.apply(param[1]);
+                    
+                return new MapValue((Class<? extends Map>)raw, (Class<?>)key, (Class<?>)value, parse(param[0]), parse(param[1]));
+            }else
+                throw new UnsupportedOperationException("Unsupport type[" + t + "].");
+        };
+    
+        private Function<Type, Value> genericType = (t) -> {
+            Class<?> c = (Class<?>)t;
+            return (c).isArray() ? new ArrayValue(c.getComponentType(), parse(c.getComponentType())) :
+                (Value.values.containsKey(t) ? new GenericValue(c) : new PojoValue(c));
+        };
+        
+        public ParserImpl(){
+            this.parameterizedTypeFunc = parameterizedType;
+            this.genericTypeFunc = genericType;
+        }
+    
+        public ParserImpl(Function<Type, Value> parameterizedTypeFunc, Function<Type, Value> genericTypeFunc){
+            this.parameterizedTypeFunc = parameterizedTypeFunc;
+            this.genericTypeFunc = genericTypeFunc;
+        }
+
+        public Value parse(Type t){
+            return t instanceof ParameterizedType ? parameterizedTypeFunc.apply(t) : genericTypeFunc.apply(t);
+        }
     }
 }
