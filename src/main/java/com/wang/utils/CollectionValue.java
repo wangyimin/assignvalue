@@ -1,5 +1,6 @@
 package com.wang.utils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 
@@ -15,11 +16,13 @@ public class CollectionValue<E> extends GenericValue{
     }
     
     @SuppressWarnings("unchecked")
-    public Object set() throws Throwable{
+    public Object set(){
         Collection<E> lst = List.of((E)ext.set());
-
-        return clazz.isInterface() ? lst :
-            clazz.getConstructor(Collection.class).newInstance(lst); 
+        try{
+            return clazz.isInterface() ? lst :
+                clazz.getConstructor(Collection.class).newInstance(lst); 
+        }catch(NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ignore ){}
+        return null;
     }
 
     public String show(){

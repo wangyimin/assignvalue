@@ -7,7 +7,7 @@ public class GenericValue implements Value{
         this.clazz = clazz;
     }
 
-    public Object set() throws Throwable{
+    public Object set(){
         return values.get(clazz);
     } 
 

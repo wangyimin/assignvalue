@@ -8,14 +8,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 
-public class PojoValue extends GenericValue{
+public class PojoValue extends GenericValue implements Pojo{
 	static Map<String, Object> pojos = new HashMap<>();
 	
     public PojoValue(Class<?> clazz){
         super(clazz);
     }
 
-    public Object set() throws Throwable{
+    public Object set(){
         @SuppressWarnings("rawtypes")
 		final BiFunction<Class<?>, Object, Boolean> isNull = (c, v) -> {
 			if (v == null)                            return true;
@@ -26,20 +26,22 @@ public class PojoValue extends GenericValue{
 			return false;
 		};
 
-		ClassAnalysis ca = new ClassAnalysis(clazz);
-		Object obj = ca.newInstance();
-		if (ca.getParameterCount() != 0) return obj;
+		Object obj = initialzie(clazz);
+		if (obj == null) return null;
+
 		pojos.put(clazz.getName(), obj);
 
 		Field[] fs = clazz.getDeclaredFields();
 		for (Field f : fs) {
 			if (Modifier.isStatic(f.getModifiers())) continue;
-			if (ClassAnalysis.hasGenericType(f.getGenericType())) continue;
+			if (Pojo.hasGenericType(f.getGenericType())) continue;
 			
 			f.setAccessible(true);
-            if (!isNull.apply(f.getType(), f.get(obj))) continue;
 
-			f.set(obj, pojos.containsKey(f.getType().getName())?pojos.get(f.getType().getName()):Parser.parse(f).set());
+			try{
+            	if (!isNull.apply(f.getType(), f.get(obj))) continue;
+				f.set(obj, pojos.containsKey(f.getType().getName())?pojos.get(f.getType().getName()):Parser.parse(f).set());
+			}catch(IllegalAccessException ignore){}
 		}
 		return obj;
     }

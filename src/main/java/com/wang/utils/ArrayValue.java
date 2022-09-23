@@ -7,7 +7,7 @@ public class ArrayValue extends GenericValue{
         super(clazz);
     }
     
-    public Object set() throws Throwable{
+    public Object set(){
         Object obj = Array.newInstance(clazz, 1);
 		
 		Object el = Parser.parse(clazz).set();

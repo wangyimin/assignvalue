@@ -10,6 +10,6 @@ public interface Value {
             put(int.class, 1);
     }};
 
-    Object set() throws Throwable;
+    Object set();
     default String show(){return "unknown implementation.";};
 }

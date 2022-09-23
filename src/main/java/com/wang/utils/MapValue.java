@@ -1,5 +1,6 @@
 package com.wang.utils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 public class MapValue<K, V> extends GenericValue{
@@ -18,11 +19,13 @@ public class MapValue<K, V> extends GenericValue{
     }
     
     @SuppressWarnings("unchecked")
-    public Object set() throws Throwable{
+    public Object set(){
         Map<K, V> map = Map.of((K)extKey.set(), (V)extValue.set());
-
-        return clazz.isInterface() ? map :
-             clazz.getConstructor(Map.class).newInstance(map); 
+        try{
+            return clazz.isInterface() ? map :
+                clazz.getConstructor(Map.class).newInstance(map); 
+        }catch(NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ignore ){}
+        return null;
     }
 
     public String show(){
