@@ -15,17 +15,18 @@ import java.util.stream.IntStream;
 
 public class ClassAnalysis {
     Class<?> clazz;
-    Constructor<?>[] ctor;
-    Parameter[] params;
-    Object[] values;
+    Constructor<?>[] ctor = new Constructor<?>[0];
+    Parameter[] params = new Parameter[0];
+    Object[] values = new Object[0];
+    Parser parser = new Parser.ParserImpl();
 
     @SuppressWarnings("unused")
     private ClassAnalysis(){}
 
-    public ClassAnalysis(Class<?> clazz) throws Throwable{
+    public ClassAnalysis(Class<?> clazz){
         this.clazz = clazz;
 
-        if (Modifier.isAbstract(clazz.getModifiers()) || Modifier.isStatic(clazz.getModifiers()) ||
+        if (clazz.isPrimitive() || Modifier.isAbstract(clazz.getModifiers()) || 
             Modifier.isInterface(clazz.getModifiers())) 
             return;
 
@@ -37,15 +38,17 @@ public class ClassAnalysis {
         if (ctor.length == 0) return;
 
         params = ctor[0].getParameters();
-
-        values = new Object[params.length];
-        for (int i = 0; i < values.length; i++){
-            values[i] = Parser.parse(params[i]).set();
-        }
     }
 
     public Object newInstance() throws Throwable{
-        return ctor.length == 0 ? null : ctor[0].newInstance(values);
+        if (ctor.length == 0) return null;
+
+        values = new Object[params.length];
+        for (int i = 0; i < values.length; i++){
+            values[i] = parser.parse(params[i]).set();
+        }
+
+        return ctor[0].newInstance(values);
     }
 
     public int getParameterCount(){

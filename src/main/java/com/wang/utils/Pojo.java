@@ -66,22 +66,22 @@ public interface Pojo {
 		return !clazz.isPrimitive() && !Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()); 
 	}
 
-    Object[] getConstructorParamaterValues(Parameter[] params);
+    default Object[] getConstructorParamaterValues(Parameter[] params){ return null; };
     
     default Object initialzie(Class<?> clazz){
 		if (!canEvaluable(clazz)) return null;
 		
-		Constructor<?>[] ctor = Arrays.stream(clazz.getDeclaredConstructors())
+		Constructor<?> ctor = Arrays.stream(clazz.getDeclaredConstructors())
                 .filter(el -> Modifier.isPublic(el.getModifiers()) &&
                     Arrays.stream(el.getGenericParameterTypes()).allMatch(p -> !Pojo.hasGenericType(p)))
 				.sorted((el1, el2) -> ((Integer)el1.getParameterCount()).compareTo((Integer)el2.getParameterCount()))
-                .toArray(Constructor<?>[]::new);
+                .findFirst().orElse(null);
 
-		if (ctor.length == 0) return null;
+        Object[] values;
+		if (ctor == null || ((values = getConstructorParamaterValues(ctor.getParameters())) == null)) return null;
 
-		Object[] values = getConstructorParamaterValues(ctor[0].getParameters());
 		try{
-        	return ctor[0].newInstance(values);
+        	return ctor.newInstance(values);
 		}catch(InstantiationException | IllegalAccessException | InvocationTargetException ignore ){}
 		
 		return null;
