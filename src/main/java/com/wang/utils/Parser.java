@@ -20,7 +20,7 @@ public interface Parser {
     }
 
     static Parser getDefaultParser(){
-        return ParserImpl.getParser();
+        return ParserImpl.getParserImpl();
     }
 
     class ParserImpl implements Parser{
@@ -29,14 +29,14 @@ public interface Parser {
         //Array、Primitive・Wrapper、Class等
         Function<Type, Value> genericTypeFunc;
 
-        static ParserImpl parserImpl;
+        static Parser parserImpl;
 
-        private Function<Type, Type> getRawType = (t) -> {
+        Function<Type, Type> getRawType = (t) -> {
             return t instanceof ParameterizedType ? ((ParameterizedType)t).getRawType() : t;
         };
     
         @SuppressWarnings({"rawtypes", "unchecked"})
-        private Function<Type, Value> parameterizedType = (t) -> {
+        Function<Type, Value> parameterizedType = (t) -> {
             Type raw = getRawType.apply(t);
                 
             if (Collection.class.isAssignableFrom((Class<?>)raw)){
@@ -56,7 +56,7 @@ public interface Parser {
                 throw new UnsupportedOperationException("Unsupport type[" + t + "].");
         };
     
-        private Function<Type, Value> genericType = (t) -> {
+        Function<Type, Value> genericType = (t) -> {
             Class<?> c = (Class<?>)t;
             return (c).isArray() ? new ArrayValue(c.getComponentType(), parse(c.getComponentType())) :
                 (Value.values.containsKey(t) ? new GenericValue(c) : new PojoValue(c));
@@ -68,7 +68,7 @@ public interface Parser {
             parserImpl = this;
         }
 
-        public static ParserImpl getParser(){
+        public static Parser getParserImpl(){
             return parserImpl == null ? new ParserImpl() : parserImpl;
         }
 
