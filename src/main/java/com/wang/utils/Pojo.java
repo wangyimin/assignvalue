@@ -3,7 +3,6 @@ package com.wang.utils;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -14,6 +13,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public interface Pojo {
+    default boolean isPojo(Class<?> clazz) {return true;}
+    Parser getParser();
+
     static boolean hasGenericType(Type type){
         if (type instanceof TypeVariable) return true;
         if (type instanceof ParameterizedType){
@@ -66,24 +68,21 @@ public interface Pojo {
 		return !clazz.isPrimitive() && !Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()); 
 	}
 
-    default Object[] getConstructorParamaterValues(Parameter[] params){ return null; };
-    
     default Object initialzie(Class<?> clazz){
-		if (!canEvaluable(clazz)) return null;
-		
-		Constructor<?> ctor = Arrays.stream(clazz.getDeclaredConstructors())
+        if (!canEvaluable(clazz) || !isPojo(clazz)) return null;
+        
+        Constructor<?> ctor = Arrays.stream(clazz.getDeclaredConstructors())
                 .filter(el -> Modifier.isPublic(el.getModifiers()) &&
                     Arrays.stream(el.getGenericParameterTypes()).allMatch(p -> !Pojo.hasGenericType(p)))
-				.sorted((el1, el2) -> ((Integer)el1.getParameterCount()).compareTo((Integer)el2.getParameterCount()))
+                .sorted((el1, el2) -> ((Integer)el1.getParameterCount()).compareTo((Integer)el2.getParameterCount()))
                 .findFirst().orElse(null);
 
-        Object[] values;
-		if (ctor == null || ((values = getConstructorParamaterValues(ctor.getParameters())) == null)) return null;
-
-		try{
-        	return ctor.newInstance(values);
-		}catch(InstantiationException | IllegalAccessException | InvocationTargetException ignore ){}
-		
-		return null;
+        if (ctor == null) return null;
+        Object[] values = Arrays.stream(ctor.getParameters()).map(el -> getParser().parse(el).set()).toArray();
+        try{
+            return ctor.newInstance(values);
+        }catch(InstantiationException | IllegalAccessException | InvocationTargetException ignore ){}
+        
+        return null;
     }
 }

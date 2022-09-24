@@ -3,8 +3,6 @@ package com.wang.utils;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +14,10 @@ public class PojoValue extends GenericValue implements Pojo{
     public PojoValue(Class<?> clazz){
         super(clazz);
     }
+
+	public Parser getParser(){
+		return Parser.getDefaultParser();
+	}
 
     public Object set(){
         @SuppressWarnings("rawtypes")
@@ -42,7 +44,7 @@ public class PojoValue extends GenericValue implements Pojo{
 
 			try{
             	if (!isNull.apply(f.getType(), f.get(obj))) continue;
-				f.set(obj, pojos.containsKey(f.getType().getName())?pojos.get(f.getType().getName()):parser.parse(f).set());
+				f.set(obj, pojos.containsKey(f.getType().getName())?pojos.get(f.getType().getName()):getParser().parse(f).set());
 			}catch(IllegalAccessException ignore){}
 		}
 		return obj;
@@ -50,9 +52,5 @@ public class PojoValue extends GenericValue implements Pojo{
 
 	public String show(){
 		return "new " + PojoValue.class.getSimpleName() + "(" + clazz.getSimpleName() + ")";
-	}
-
-	public Object[] getConstructorParamaterValues(Parameter[] params){
-		return Arrays.stream(params).map(el -> parser.parse(el).set()).toArray();
 	}
 }

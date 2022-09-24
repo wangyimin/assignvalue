@@ -19,11 +19,17 @@ public interface Parser {
         return p.getParameterizedType() != null ? parse(p.getParameterizedType()) : parse(p.getType());
     }
 
+    static Parser getDefaultParser(){
+        return ParserImpl.getParser();
+    }
+
     class ParserImpl implements Parser{
         //Collection、Map等
         Function<Type, Value> parameterizedTypeFunc;
         //Array、Primitive・Wrapper、Class等
         Function<Type, Value> genericTypeFunc;
+
+        static ParserImpl parserImpl;
 
         private Function<Type, Type> getRawType = (t) -> {
             return t instanceof ParameterizedType ? ((ParameterizedType)t).getRawType() : t;
@@ -56,14 +62,14 @@ public interface Parser {
                 (Value.values.containsKey(t) ? new GenericValue(c) : new PojoValue(c));
         };
         
-        public ParserImpl(){
+        ParserImpl(){
             this.parameterizedTypeFunc = parameterizedType;
             this.genericTypeFunc = genericType;
+            parserImpl = this;
         }
-    
-        public ParserImpl(Function<Type, Value> parameterizedTypeFunc, Function<Type, Value> genericTypeFunc){
-            this.parameterizedTypeFunc = parameterizedTypeFunc;
-            this.genericTypeFunc = genericTypeFunc;
+
+        public static ParserImpl getParser(){
+            return parserImpl == null ? new ParserImpl() : parserImpl;
         }
 
         public Value parse(Type t){
