@@ -20,7 +20,7 @@ public interface Parser {
     }
 
     static Parser getDefaultParser(){
-        return ParserImpl.getParserImpl();
+        return ParserImpl.parserImpl == null ? new ParserImpl() : ParserImpl.parserImpl;
     }
 
     class ParserImpl implements Parser{
@@ -28,8 +28,8 @@ public interface Parser {
         Function<Type, Value> parameterizedTypeFunc;
         //Array、Primitive・Wrapper、Class等
         Function<Type, Value> genericTypeFunc;
-
-        static Parser parserImpl;
+ 
+        public static Parser parserImpl;
 
         Function<Type, Type> getRawType = (t) -> {
             return t instanceof ParameterizedType ? ((ParameterizedType)t).getRawType() : t;
@@ -66,10 +66,6 @@ public interface Parser {
             this.parameterizedTypeFunc = parameterizedType;
             this.genericTypeFunc = genericType;
             parserImpl = this;
-        }
-
-        public static Parser getParserImpl(){
-            return parserImpl == null ? new ParserImpl() : parserImpl;
         }
 
         public Value parse(Type t){
